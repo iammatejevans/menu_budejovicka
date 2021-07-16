@@ -8,7 +8,6 @@ from main import kopecek, kolkovna, antal, kantyna_olbrachtova
 def send_mail():
 
     yag = yagmail.SMTP('menu.budejovicka@gmail.com', 'sQW15uebG')
-    recipients = ['iam.matejevans@gmail.com']
     subject = 'Denní menu Budějovická'
 
     timestamp = datetime.timestamp(datetime.now() - timedelta(days=1))
@@ -31,26 +30,23 @@ def send_mail():
     html = [
         '<!DOCTYPE html>',
         '<html><head> <title>Polední menu Budějovická</title>',
-        '<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"', 
-        'rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"', 
-        'crossorigin="anonymous">',
-        '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"',
-        'integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"', 
-        'crossorigin="anonymous"></script>',
         '</head> <body>',
-        '<div class="container mb-5">',
-        '<h1 class="mt-5">Polední menu</h1>'
+        '<div>',
+        '<h1>Polední menu</h1>'
     ]
 
     for restaurant, menu in results.items():
-        html.append(f'<h3 class="mt-5"> {restaurant}</h3>')
-        html.append('<table class="table mb-3 table-hover"><tbody>')
+        html.append(f'<h3> {restaurant}</h3>')
+        html.append('<table><tbody>')
 
         for meal, price in menu.items():
             html.append(f'<tr><td>{meal}</td><td>{price}</td></tr>')
         
         html.append('</tbody></table>')
     html.append('</div></body></html>')
+
+    with open('emails.txt', 'a') as fle:
+        recipients = fle.read().split('\n')
 
     for email in recipients:
         yag.send(email, subject, ''.join(html))
