@@ -50,7 +50,10 @@ def send_mail():
         recipients = fle.read().split('\n')
 
     for email in recipients:
-        yag.send(email, subject, ''.join(html))
+        try:
+            yag.send(email, subject, ''.join(html))
+        except:
+            pass
 
 
 if __name__ == '__main__':
