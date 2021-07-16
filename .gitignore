@@ -1,0 +1,4 @@
+__pycache__/
+venv/
+timestamp.txt
+results.json
