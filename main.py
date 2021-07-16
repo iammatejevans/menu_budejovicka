@@ -7,12 +7,11 @@ from bs4 import BeautifulSoup
 
 
 def get_menu():
-    os.environ['SCRAPERAPI_KEY'] = '1fe57d709a9593808bb9e9f229260d4c'
     timestamp = datetime.timestamp(datetime.now() - timedelta(days=1))
     if os.path.exists('timestamp.txt'):
         with open('timestamp.txt', 'r') as fle:
             timestamp = fle.read()
-    if datetime.now().date() > datetime.fromtimestamp(float(timestamp)).date():
+    if datetime.now().date() > datetime.fromtimestamp(float(timestamp)).date() or not os.path.exists('results.json'):
         results = {'Restaurace na Kopečku': kopecek(),
                    'Kolkovna': kolkovna(),
                    'Antal': antal(),
@@ -26,8 +25,6 @@ def get_menu():
         return json.load(fle)
 
 
-#os.environ['SCRAPERAPI_KEY'] = '1fe57d709a9593808bb9e9f229260d4c'
-#URL = f'http://api.scraperapi.com?api_key={os.getenv("SCRAPERAPI_KEY")}&url='
 URL = ''
 
 
@@ -54,7 +51,7 @@ def kopecek():
                     price = meal[2].text
                     result[name] = price
     if not result:
-        today = datetime.strftime(datetime.now(), '%#d.%-m.%Y')  # change '#' to '-' on linux
+        today = datetime.strftime(datetime.now(), '%-d.%-m.%Y')  # change '#' to '-' on linux
         for day in days:
             if today in day.parent.text.strip().split():
                 menu = day.find_parent('div', attrs={'class': 'dailyMenu'}).findAll('tr')
@@ -156,6 +153,6 @@ def coolna():
 
 if __name__ == '__main__':
     print(kopecek())
-    # print(antal())
+    print(antal())
     # print(kolkovna())
     # print(kantyna_olbrachtova())
