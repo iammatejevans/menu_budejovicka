@@ -53,6 +53,23 @@ def kopecek():
                     name = meal[1].find('span', attrs={'class': 'td-jidlo-obsah'}).text
                     price = meal[2].text
                     result[name] = price
+    if not result:
+        today = datetime.strftime(datetime.now(), '%#d.%-m.%Y')  # change '#' to '-' on linux
+        for day in days:
+            if today in day.parent.text.strip().split():
+                menu = day.find_parent('div', attrs={'class': 'dailyMenu'}).findAll('tr')
+                for item in menu:
+                    if len(item.findAll('td')) == 1:  # jedna se o nadpis
+                        if item.findAll('td')[0].next_element.text.strip() == 'Menu':
+                            break
+                    else:
+                        try:
+                            meal = item.findAll('td')
+                            name = meal[1].find('span', attrs={'class': 'td-jidlo-obsah'}).text
+                            price = meal[2].text
+                            result[name] = price
+                        except:
+                            pass
     return result
 
 
@@ -139,6 +156,6 @@ def coolna():
 
 if __name__ == '__main__':
     print(kopecek())
-    print(antal())
-    print(kolkovna())
-    print(kantyna_olbrachtova())
+    # print(antal())
+    # print(kolkovna())
+    # print(kantyna_olbrachtova())
