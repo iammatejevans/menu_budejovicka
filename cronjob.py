@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 
 from main import kopecek, kolkovna, antal, kantyna_olbrachtova
 
+
 def send_mail():
 
     yag = yagmail.SMTP('menu.budejovicka@gmail.com', 'sQW15uebG')
