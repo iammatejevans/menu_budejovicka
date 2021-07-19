@@ -46,8 +46,10 @@ def send_mail():
         html.append('</tbody></table>')
     html.append('</div></body></html>')
 
-    with open('emails.txt', 'a') as fle:
-        recipients = fle.read().split('\n')
+    recipients = []
+    if os.path.exists('emails.txt'):
+        with open('emails.txt', 'r') as fle:
+            recipients = fle.read().split('\n')
 
     for email in recipients:
         try:
