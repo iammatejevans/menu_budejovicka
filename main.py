@@ -132,6 +132,8 @@ def kantyna_olbrachtova():
                             price = menu[i+1].text
                     except IndexError:
                         pass
+                    if price == '29 Kč' and ' ' not in results:
+                        results[' '] = Cena za sto gramů:
                     result[name] = price
     result = dict(list(result.items())[:-1])
     return result
