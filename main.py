@@ -14,6 +14,7 @@ def get_menu():
     if datetime.now().date() > datetime.fromtimestamp(float(timestamp)).date() or not os.path.exists('results.json'):
         results = {'Restaurace na Kopečku': kopecek(),
                    'Červená Cibule': cibule(),
+                   'U Kubíka': kubik(),
                    'Kolkovna': kolkovna(),
                    'Antal': antal(),
                    'Kantýna České Spořitalny Olbrachtova': kantyna_olbrachtova()}
@@ -87,6 +88,23 @@ def cibule():
             price = text[-1]
             if 'nápoje' in name:
                 break
+            result[name] = price
+    return result
+
+
+def kubik():
+    result = {}
+    url = URL + 'http://www.ukubika.cz/'
+    headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:81.0) Gecko/20100101 Firefox/81.0'}
+    response = requests.get(url, headers=headers)
+    response.encoding = 'utf-8'
+    menu_soup = BeautifulSoup(response.text, 'html.parser')
+
+    menu = menu_soup.findAll('div', attrs={'class': 'daily-item'})
+    for meal in menu:
+        name = meal.find('div', attrs={'class': 'daily-itemName'}).text
+        price = meal.find('div', attrs={'class': 'daily-itemPrice'}).text
+        if name:
             result[name] = price
     return result
 
