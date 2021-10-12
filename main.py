@@ -78,12 +78,12 @@ def antal():
     response.encoding = 'utf-8'
     menu_soup = BeautifulSoup(response.text, 'html.parser')
 
-    menu = menu_soup.findAll('div', attrs={'class': 'title-box'})
+    menu = menu_soup.findAll('div', attrs={'class': 'menu-item-header'})
     for meal in menu:
-        name = meal.find('h3').text
-        price = meal.find('span').text
+        name = meal.find('h3', attrs={'class': 'menu-item-name'}).text
+        price = meal.find('span', attrs={'class': 'menu-item-price'}).text
         if name:
-            result[name] = price
+            result[name] = price.replace(',-', '')
 
     return result
 
