@@ -13,6 +13,7 @@ def get_menu():
             timestamp = fle.read()
     if datetime.now().date() > datetime.fromtimestamp(float(timestamp)).date() or not os.path.exists('results.json'):
         results = {'Restaurace na Kopečku': kopecek(),
+                   'Červená Cibule': cibule(),
                    'Kolkovna': kolkovna(),
                    'Antal': antal(),
                    'Kantýna České Spořitalny Olbrachtova': kantyna_olbrachtova()}
@@ -70,6 +71,26 @@ def kopecek():
     return result
 
 
+def cibule():
+    result = {}
+    url = URL + 'http://www.cervena-cibule.cz/cz/poledni-menu/'
+    headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:81.0) Gecko/20100101 Firefox/81.0'}
+    response = requests.get(url, headers=headers)
+    response.encoding = 'utf-8'
+    menu_soup = BeautifulSoup(response.text, 'html.parser')
+
+    menu = menu_soup.findAll('span', attrs={'style': 'font-size: medium;'})
+    for meal in menu:
+        if meal.text.strip():
+            text = meal.text.strip().split(',-')[0].split(' ')
+            name = ' '.join(text[:-1])
+            price = text[-1]
+            if 'nápoje' in name:
+                break
+            result[name] = price
+    return result
+
+    
 def antal():
     result = {}
     url = URL + 'https://www.restauraceantal.cz/aktualne'
