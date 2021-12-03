@@ -84,9 +84,9 @@ def cibule():
     for meal in menu:
         if meal.text.strip():
             text = meal.text.strip().split(',-')[0].split(' ')
-            name = ' '.join(text[:-1])
+            name = ' '.join(text[:-1]).replace("\xa0", "")
             price = text[-1]
-            if 'nápoje' in name:
+            if not name or 'nápoje' in name:
                 break
             result[name] = price
     return result
@@ -108,7 +108,7 @@ def kubik():
             result[name] = price
     return result
 
-    
+
 def antal():
     result = {}
     url = URL + 'https://www.restauraceantal.cz/aktualne'
@@ -167,12 +167,12 @@ def kantyna_olbrachtova():
                 else:
                     name = menu[i].text
                     try:
-                        if 'Kč' in menu[i+1].text:
-                            price = menu[i+1].text
+                        if 'Kč' in menu[i + 1].text:
+                            price = menu[i + 1].text
                     except IndexError:
                         pass
-                    if price == '29 Kč' and ' ' not in results:
-                        results[' '] = Cena za sto gramů:
+                    if price == '29 Kč' and ' ' not in result:
+                        result[' '] = "Cena za sto gramů:"
                     result[name] = price
     result = dict(list(result.items())[:-1])
     return result
@@ -193,7 +193,4 @@ def coolna():
 
 
 if __name__ == '__main__':
-    print(kopecek())
-    print(antal())
-    # print(kolkovna())
-    # print(kantyna_olbrachtova())
+    print(get_menu())

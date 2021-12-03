@@ -3,7 +3,7 @@ import os
 import json
 from datetime import datetime, timedelta
 
-from main import kopecek, kolkovna, antal, kantyna_olbrachtova
+from main import get_menu
 
 
 def send_mail():
@@ -16,10 +16,7 @@ def send_mail():
         with open('timestamp.txt', 'r') as fle:
             timestamp = fle.read()
     if datetime.now().date() > datetime.fromtimestamp(float(timestamp)).date():
-        results = {'Restaurace na Kopečku': kopecek(),
-                   'Kolkovna': kolkovna(),
-                   'Antal': antal(),
-                   'Kantýna České Spořitalny Olbrachtova': kantyna_olbrachtova()}
+        results = get_menu()
         with open('results.json', 'w') as fle:
             json.dump(results, fle)
         with open('timestamp.txt', 'w') as fle:
