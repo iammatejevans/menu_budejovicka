@@ -40,9 +40,11 @@ def kopecek():
 
     days = menu_soup.findAll('span', attrs={'class': 'dm-name'})
     today = datetime.strftime(datetime.now(), '%#d.%#m.%Y')  # change '#' to '-' on linux
+
     for day in days:
         if today in day.parent.text.strip().split():
             menu = day.find_parent('div', attrs={'class': 'dailyMenu'}).findAll('tr')
+
             for item in menu:
                 if len(item.findAll('td')) == 1:  # jedna se o nadpis
                     if item.findAll('td')[0].next_element.text.strip() == 'Menu':
@@ -52,11 +54,13 @@ def kopecek():
                     name = meal[1].find('span', attrs={'class': 'td-jidlo-obsah'}).text
                     price = meal[2].text
                     result[name] = price
+
     if not result:
         today = datetime.strftime(datetime.now(), '%-d.%-m.%Y')  # change '#' to '-' on linux
         for day in days:
             if today in day.parent.text.strip().split():
                 menu = day.find_parent('div', attrs={'class': 'dailyMenu'}).findAll('tr')
+
                 for item in menu:
                     if len(item.findAll('td')) == 1:  # jedna se o nadpis
                         if item.findAll('td')[0].next_element.text.strip() == 'Menu':
@@ -73,7 +77,13 @@ def kopecek():
 
 
 def cibule():
+
+    def is_price(text):
+        name = ' '.join(text).replace("\xa0", "")
+        return name, None
+
     result = {}
+    name, price = None, None
     url = URL + 'http://www.cervena-cibule.cz/cz/poledni-menu/'
     headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:81.0) Gecko/20100101 Firefox/81.0'}
     response = requests.get(url, headers=headers)
@@ -84,11 +94,32 @@ def cibule():
     for meal in menu:
         if meal.text.strip():
             text = meal.text.strip().split(',-')[0].split(' ')
-            name = ' '.join(text[:-1]).replace("\xa0", "")
-            price = text[-1]
-            if not name or 'nápoje' in name:
-                break
-            result[name] = price
+
+            if name or price:
+                name = (name + ' ' + ' '.join(text[:-1]).replace("\xa0", "")).strip().replace(' , ', ', ')
+                price = text[-1]
+                if not price.isnumeric():
+                    name, price = is_price(text)
+                    continue
+                else:
+                    result[name] = price + ' Kč'
+                    name, price = None, None
+
+            else:
+                name = ' '.join(text[:-1]).replace("\xa0", "").strip()
+                price = text[-1]
+
+                if not name:
+                    continue
+                if 'nápoje' in name:
+                    break
+                if not price.isnumeric():
+                    name, price = is_price(text)
+                    continue
+
+                result[name] = price + ' Kč'
+                name, price = None, None
+
     return result
 
 
@@ -101,11 +132,13 @@ def kubik():
     menu_soup = BeautifulSoup(response.text, 'html.parser')
 
     menu = menu_soup.findAll('div', attrs={'class': 'daily-item'})
+
     for meal in menu:
         name = meal.find('div', attrs={'class': 'daily-itemName'}).text
         price = meal.find('div', attrs={'class': 'daily-itemPrice'}).text
         if name:
             result[name] = price
+
     return result
 
 
@@ -118,11 +151,12 @@ def antal():
     menu_soup = BeautifulSoup(response.text, 'html.parser')
 
     menu = menu_soup.findAll('div', attrs={'class': 'menu-item-header'})
+
     for meal in menu:
         name = meal.find('h3', attrs={'class': 'menu-item-name'}).text
         price = meal.find('span', attrs={'class': 'menu-item-price'}).text
         if name:
-            result[name] = price.replace(',-', '')
+            result[name] = price.replace(',-', '') + ' Kč'
 
     return result
 
@@ -137,6 +171,7 @@ def kolkovna():
 
     days = menu_soup.findAll('section')
     today = datetime.strftime(datetime.now(), '%d.%m.%Y')  # change '#' to '-' on linux
+
     for day in days:
         if today in day.find('h2').text.strip().split():
             menu = day.findAll('tr')
@@ -144,10 +179,18 @@ def kolkovna():
                 name = meal.find('td', attrs={'class': 'name'}).text.split(' |')[0]
                 price = meal.find('td', attrs={'class': 'price'}).text
                 result[name] = price
+
     return result
 
 
 def kantyna_olbrachtova():
+
+    def get_index(menu):
+        for index, item in enumerate(menu):
+            if item.text == 'Polévky':
+                return index
+        return 100
+
     result = {}
     url = URL + 'https://www.prague-catering.cz/provozovny/kantyna-ceska-sporitelna-olbrachtova/Denni-menu-Olbrachtova/'
     headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:81.0) Gecko/20100101 Firefox/81.0'}
@@ -156,25 +199,29 @@ def kantyna_olbrachtova():
     menu_soup = BeautifulSoup(response.text, 'html.parser')
 
     menu = menu_soup.findAll('td')
+    menu = menu[get_index(menu):]
     price = ''
-    for i in range(len(menu)):
-        if not menu[i].find('h3'):
-            if menu[i].text.replace('\xa0', ''):
-                if '100/200 g' in menu[i].text or 'váhu' in menu[i].text:
+
+    for idx, item in enumerate(menu):
+        if not item.find('h3'):
+            if item.text.replace('\xa0', ''):
+                if '100/200 g' in item.text or 'váhu' in item.text:
                     continue
-                if 'Kč' in menu[i].text:
-                    price = menu[i].text
+                if 'Kč' in item.text:
+                    price = item.text
                 else:
-                    name = menu[i].text
+                    name = item.text
                     try:
-                        if 'Kč' in menu[i + 1].text:
-                            price = menu[i + 1].text
+                        if 'Kč' in menu[idx + 1].text:
+                            price = menu[idx + 1].text
                     except IndexError:
                         pass
                     if price == '29 Kč' and ' ' not in result:
                         result[' '] = "Cena za sto gramů:"
                     result[name] = price
+
     result = dict(list(result.items())[:-1])
+
     return result
 
 
@@ -193,4 +240,5 @@ def coolna():
 
 
 if __name__ == '__main__':
-    print(get_menu())
+    # print(get_menu())
+    print(kantyna_olbrachtova())
