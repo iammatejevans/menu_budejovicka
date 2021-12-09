@@ -16,3 +16,6 @@ urllib3==1.26.6
 Werkzeug==2.0.1
 zipp==3.5.0
 yagmail==0.14.256
+lxml==4.6.4
+numpy==1.21.0
+pdfminer==20191125
