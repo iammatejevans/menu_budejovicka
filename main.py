@@ -14,6 +14,7 @@ def get_menu():
     if datetime.now().date() > datetime.fromtimestamp(float(timestamp)).date() or not os.path.exists('results.json'):
         results = {'Restaurace na Kopečku': kopecek(),
                    'Červená Cibule': cibule(),
+                   'Na Zelené Lišce': zelena_liska(),
                    'U Kubíka': kubik(),
                    'Kolkovna': kolkovna(),
                    'Antal': antal(),
@@ -221,6 +222,23 @@ def kantyna_olbrachtova():
                     result[name] = price
 
     result = dict(list(result.items())[:-1])
+
+    return result
+
+
+def zelena_liska():
+    url = URL + "https://www.zelenaliska.cz/images/poledni-menu/menu_zelenaliska.pdf"
+    response = requests.get(url)
+    pdf_file = "menu_zelenaliska.pdf"
+    xml_file = "menu_zelenaliska.xml"
+
+    with open(pdf_file, 'wb') as f:
+        f.write(response.content)
+
+    Pdf2xml(pdf_file).run()
+    result = ParseZelenaLiska(xml_file).run()
+    os.remove(pdf_file)
+    os.remove(xml_file)
 
     return result
 
